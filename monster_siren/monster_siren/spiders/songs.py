@@ -8,9 +8,6 @@ class SongsSpider(scrapy.Spider):
     name = 'songs'
     allowed_domains = ['hypergryph.com', 'hycdn.cn']
     start_urls = ['https://monster-siren.hypergryph.com/api/songs']
-    music_name = {}
-    source = {}
-    lyric = {}
 
     def parse(self, response):
         """
@@ -37,22 +34,18 @@ class SongsSpider(scrapy.Spider):
         lyric_url = jsonpath(cache, '$..lyricUrl')[0]
         source_url = jsonpath(cache, '$..sourceUrl')[0]
         name = jsonpath(cache, '$..name')[0]
-        cid = jsonpath(cache, '$..cid')[0]
-        # 以url为键，cid为值储存，方便查询链接对应的cid
-        self.lyric[lyric_url] = cid
-        self.source[source_url] = cid
-        # 以cid为键，歌曲名为值储存，方便查询cid对应的名字
-        self.music_name[cid] = name
         # 发送请求，获取音频文件
         yield scrapy.Request(
             url=source_url,
-            callback=self.music_mp3
+            callback=self.music_mp3,
+            meta={'name': name}
         )
         # 发送请求，获取歌词文件，因为部分歌曲没有歌词所以try一下防止报错
         try:
             yield scrapy.Request(
                 url=lyric_url,
-                callback=self.lyric_lrc
+                callback=self.lyric_lrc,
+                meta={'name': name}
             )
         except:
             pass
@@ -64,11 +57,8 @@ class SongsSpider(scrapy.Spider):
         :param response:
         :return:
         """
-        cid = self.source[response.url]
-        name = self.music_name[cid]
-
         temp = MonsterSirenItem()
-        temp['name'] = name
+        temp['name'] = response.meta['name']
         temp['source'] = response.body
         temp['lyric'] = False
         temp['suffix'] = 'mp3'
@@ -81,11 +71,8 @@ class SongsSpider(scrapy.Spider):
         :param response:
         :return:
         """
-        cid = self.lyric[response.url]
-        name = self.music_name[cid]
-
         temp = MonsterSirenItem()
-        temp['name'] = name
+        temp['name'] = response.meta['name']
         temp['source'] = False
         temp['lyric'] = response.body
         temp['suffix'] = 'lrc'
