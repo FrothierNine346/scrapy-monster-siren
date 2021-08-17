@@ -7,6 +7,21 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+# 分布式爬虫部分
+# 运行普通爬虫时需要注释掉分布式爬虫部分
+# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+#
+# SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+#
+# REDIS_URL = 'redis://127.0.0.1:6379'
+#
+# SCHEDULER_PERSIST = True
+#
+# DOWNLOAD_DELAY = 1
+# 分布式爬虫结束
+
+LOG_LEVEL = 'WARNING'
+
 BOT_NAME = 'monster_siren'
 
 SPIDER_MODULES = ['monster_siren.spiders']
