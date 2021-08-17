@@ -15,6 +15,7 @@ class MonsterSirenPipeline:
     def process_item(self, item, spider):
         """
         接受数据并保存
+        OSError: [WinError 123] 文件名、目录名或卷标语法不正确。: 'music/0:00:01'
         :param item:
         :param spider:
         :return:
@@ -23,6 +24,8 @@ class MonsterSirenPipeline:
         source = item['source']
         lyric = item['lyric']
         suffix = item['suffix']
+        # 部分歌曲名有非法字符，此处替换
+        name = re.sub(r'[\\/:*?<>"|]', '!', name)
         # 部分歌曲名带有下面第一个标签，这是对应歌曲的无人声版，所以我把它放到有人声版的同一文件夹，但鹰角把部分标签写错成了后两种，目前正则无法
         # 匹配到最后一种，有大佬的话帮忙写个能同时匹配下面三种的正则
         # (Instrumental)
